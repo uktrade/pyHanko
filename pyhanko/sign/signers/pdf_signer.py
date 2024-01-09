@@ -1666,70 +1666,8 @@ class PdfSigningSession:
         # if there's no validation context, bail early
         if validation_context is None:
             return None
-
-        signer_path = await self._perform_presign_signer_validation(
-            validation_context, signature_meta.signer_key_usage
-        )
-        validation_paths.append(signer_path)
-
-        # If LTA:
-        # if the original document already included a document timestamp,
-        # we need to collect revocation information for it, to preserve
-        # the integrity of the timestamp chain
-        if signature_meta.use_pades_lta and isinstance(
-            pdf_out, IncrementalPdfFileWriter
-        ):
-            prev_tsa_path = await self._perform_prev_ts_validation(
-                validation_context, pdf_out.prev
-            )
-            if prev_tsa_path is not None:
-                validation_paths.append(prev_tsa_path)
-
-        timestamper = self.timestamper
-        # Finally, fetch validation information for the TSA that we're going to
-        # use for our own TS
-        if timestamper is not None:
-            async_ts_paths = timestamper.validation_paths(validation_context)
-            ts_paths = []
-            async for ts_path in async_ts_paths:
-                validation_paths.append(ts_path)
-                ts_paths.append(ts_path)
         else:
-            ts_paths = None
-
-        aa_paths: List[ValidationPath]
-        # fetch attribute certificate validation paths
-        if signature_meta.ac_validation_context is not None:
-            async_aa_paths = self._perform_presign_ac_validation(
-                signature_meta.ac_validation_context
-            )
-            aa_paths = []
-            async for aa_path in async_aa_paths:
-                validation_paths.append(aa_path)
-                aa_paths.append(aa_path)
-        else:
-            aa_paths = []
-
-        # do we need adobe-style revocation info?
-        if signature_meta.embed_validation_info and not self.use_pades:
-            assert validation_context is not None  # checked earlier
-            revinfo = Signer.format_revinfo(
-                ocsp_responses=validation_context.ocsps,
-                crls=validation_context.crls,
-            )
-        else:
-            # PAdES prescribes another mechanism for embedding revocation info
-            revinfo = None
-        return PreSignValidationStatus(
-            validation_paths=validation_paths,
-            signer_path=signer_path,
-            ts_validation_paths=ts_paths,
-            adobe_revinfo_attr=revinfo,
-            ocsps_to_embed=validation_context.ocsps,
-            crls_to_embed=validation_context.crls,
-            ac_validation_paths=aa_paths,
-        )
-
+            raise Exception("Signature validation is not supported in DBT pyHanko")
     async def _perform_presign_ac_validation(
         self, validation_context: ValidationContext
     ):
