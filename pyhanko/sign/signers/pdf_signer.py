@@ -1036,14 +1036,7 @@ class PdfSigner:
                 "in a given document."
             )
 
-        from pyhanko.sign.validation import read_certification_data
-
-        cd = read_certification_data(reader)
-        # if there is no author signature, we don't have to do anything
-        if cd is None:
-            return
-        if cd.permission == MDPPerm.NO_CHANGES:
-            raise SigningError("Author signature forbids all changes")
+        return
 
     def _retrieve_seed_value_spec(
         self, sig_field
